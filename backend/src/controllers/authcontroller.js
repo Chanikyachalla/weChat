@@ -1,6 +1,7 @@
-import User from "../models/user.js";
+import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../config/util.js";
+import cloudinary from "../config/clodinary.js";
 
 export const signup = async (req, res) => {
   const {  email,fullName ,   password } = req.body;
@@ -84,5 +85,31 @@ export const logout = async (req,res) =>{
 }
 
 export const updateProfile = async (req , res) =>{
-    const {profilePic}
+  try{
+    const {profilePic} = req.body ;
+    const userId = req.user._id;
+
+    if(!profilePic){
+      return res.status(400).json({message: "profile pic is required "});
+    }
+
+     const uploadResponse = await cloudinary.uploader.upload(profilePic);
+     const updatedUser = await User.findByIdAndUpdate(userId , {profilePic : uploadResponse.secure_url} , {new: true });
+
+     res.status(200).json(updatedUser);
+  } catch (error){
+    console.log("some error in the profile piic ploadin in login controller " , error.message);
+        res.status(500).json({message: "some internal error in the profile piic ploadin in login controller"});
+  }
+    
 } 
+
+export const checkAuth = async (req, res) => {
+   try{
+    req.User(200).json(req.user);
+   }
+   catch(error){
+    console.log("some error in the check auth controller " , error.message);
+        res.status(500).json({message: "some internal error in the check auth controller"});
+   }
+  }
