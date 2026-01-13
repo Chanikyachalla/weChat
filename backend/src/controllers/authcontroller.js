@@ -27,16 +27,22 @@ export const signup = async (req, res) => {
     });
 
     if (newuser) {
-      generateToken(newuser._id, res);
+      const token = generateToken(newuser._id);
+      res
+  .cookie("token", token, {
+    httpOnly: true,
+    secure: false, // REQUIRED for Postman & localhost
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  })
+  .status(201)
+  .json({
+    _id: newuser._id,
+    fullName: newuser.fullName,
+    email: newuser.email,
+    profilePic: newuser.profilePic,
+  });
 
-      await newuser.save();
-
-      res.status(201).json({
-        _id: newUser._id,
-        fullName: newUser.fullName,
-        email: newUser.email,
-        profilePic: newUser.profilePic,
-      });
     } else {
       res.status(400).json({ message: "Invalid user Data" });
     }
@@ -47,41 +53,52 @@ export const signup = async (req, res) => {
   }
 };
 
+export const login = async (req, res) => {
+  const { email, password } = req.body || {};
 
-export const login = async (req,res) =>{
-    const {email , password} = req.body ;
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
 
-    try {
-        const user =  await User.findOne({email});
-        if(user){
+  try {
+    const user = await User.findOne({ email });
 
-             const isPasswordCorrect = await bcrypt.compare(password, user.password);
-             if (!isPasswordCorrect) {
+    if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
-            await  generateToken(user._id , res);
-            res.status(200).json({ 
-                _id: user._id,
-               fullName: user.fullName,
-               email: user.email,
-               profilePic: user.profilePic,
-            })
-        }
-        else{
-            res.status(400).json({message:"Invalid username and password "});
-        }
-        
-    } catch (error) {
-        console.log("some error in the login controler" , error.message);
-        res.status(500).json({message: "some internal error in the login controler"});
-        
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ message: "Invalid credentials" });
     }
-}
+
+    const token = generateToken(user._id);
+
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: false, // localhost / Postman
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .status(200)
+      .json({
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        profilePic: user.profilePic,
+      });
+
+  } catch (error) {
+    console.log("Error in login controller:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 
 export const logout = async (req,res) =>{
      res.clearCookie('token' );
      res.status(200).json({message:" user logged out "});
-
 }
 
 export const updateProfile = async (req , res) =>{
@@ -106,7 +123,8 @@ export const updateProfile = async (req , res) =>{
 
 export const checkAuth = async (req, res) => {
    try{
-    req.User(200).json(req.user);
+    console.log("Authenticated User:", req.user);
+    res.status(200).json(req.user);
    }
    catch(error){
     console.log("some error in the check auth controller " , error.message);

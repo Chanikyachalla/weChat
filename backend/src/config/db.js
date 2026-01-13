@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
 
-export const connectDb = async ()=>{
-    try {
-        await mongoose.connect(process.env.MONGODB_URI);
-        console.log("mongo db connection sucessfull");
-        
-    } catch (error) {
-        console.log(`error in db connection:${error}`);
-    }
-}
+export const connectDb = async () => {
+  try {
+    await mongoose.connect(
+    "mongodb://127.0.0.1:27017/wechatdb"
+    );
+    console.log("MongoDB connection successful");
+  } catch (error) {
+    console.error("DB connection error:", error.message);
+  }
+};

@@ -60,3 +60,15 @@ export const sendMessage = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 }
+export const deleteMessage = async (req, res) => {
+    try {
+        const { id: messageId } = req.params;
+        const deletedMessage = await Message.findByIdAndDelete(messageId);
+        if (!deletedMessage) {
+            return res.status(404).json({ message: "Message not found" });
+        }       res.status(200).json({ message: "Message deleted successfully" });
+    } catch (error) { 
+        console.error("Error in deleting a message in msh controller:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }   
+} ;
