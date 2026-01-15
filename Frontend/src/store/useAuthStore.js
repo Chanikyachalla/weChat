@@ -1,6 +1,10 @@
 import {create } from 'zustand';
 import {axiosInstance} from '../lib/axios';
 
+import { toast } from 'react-hot-toast';
+
+
+
 export const useAuthStore = create((set) => ({
  authUser: null,
  isSigningUp: false,
@@ -23,10 +27,10 @@ export const useAuthStore = create((set) => ({
     }
  },
 
-  signup: async (formData) => { 
+  signup: async (data) => { 
     set({ isSigningUp: true });
     try {
-      const response = await axiosInstance.post('/auth/signup', formData);
+      const response = await axiosInstance.post('/auth/signup', data);
       set({ authUser: response.data });
       toast.success("Signup successful!");
     } catch (error) {
@@ -35,5 +39,40 @@ export const useAuthStore = create((set) => ({
     } finally {
       set({ isSigningUp: false });
     } },
+
+    logout : async () => {
+      try{
+        await axiosInstance.post('/auth/logout');
+        set({authUser: null});
+        toast.success("Logged out successfully");
+      } catch (error){
+        console.error('Logout error:', error);
+        toast.error( error.response?.data?.message || "Logout failed. Please try again.");
+      } 
+    },
+
+    login: async (data) => { 
+      set({ isLoggingIng: true });  
+      try {
+        const response = await axiosInstance.post('/auth/login', data);
+        set({ authUser: response.data });
+        toast.success("Login successful!");
+      } catch (error) {
+        console.error('Login error:', error);
+        toast.error(error.response?.data?.message || "Login failed. Please try again.");
+      } finally {
+        set({ isLoggingIng: false });
+      } },
+
+      updateProfilePic: async (profilePic) => {
+        set({ isUpsdatingProfile: true });    
+        try {
+          
+        }catch (error) {
+          console.error('Update profile picture error:', error);
+          toast.error(error.response?.data?.message || "Profile update failed. Please try again.");
+        } finally {
+          set({ isUpsdatingProfile: false });
+        } },
 
 }));

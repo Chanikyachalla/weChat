@@ -72,13 +72,12 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = generateToken(user._id);
-
+    const token = await generateToken(user._id);
+    console.log("Login Token:", token);
     res
       .cookie("token", token, {
         httpOnly: true,
         secure: false, // localhost / Postman
-        sameSite: "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .status(200)

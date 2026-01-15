@@ -1,67 +1,57 @@
 import React from 'react'
+import { useAuthStore } from '../store/useAuthStore';
+import { Link } from 'react-router-dom';
+import { MessageSquare, User, LogOut, Settings } from 'lucide-react';
+
 
 const Navbar = () => {
-  
+  const {logout , authUser} = useAuthStore();
 
   return (
-    <div class="navbar bg-base-100">
-  <div class="flex-1">
-    <a class="btn btn-ghost text-xl">daisyUI</a>
-  </div>
-  <div class="flex-none">
-    <div class="dropdown dropdown-end">
-      <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
-        <div class="indicator">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-          <span class="badge badge-sm indicator-item">8</span>
-        </div>
-      </div>
-      <div
-        tabindex="0"
-        class="card card-compact dropdown-content bg-base-100 z-[1] mt-3 w-52 shadow">
-        <div class="card-body">
-          <span class="text-lg font-bold">8 Items</span>
-          <span class="text-info">Subtotal: $999</span>
-          <div class="card-actions">
-            <button class="btn btn-primary btn-block">View cart</button>
+   <header
+      className="bg-base-100 border-b border-base-300 fixed w-full top-0 z-40 
+    backdrop-blur-lg bg-base-100/80"
+    >
+      <div className="container mx-auto px-4 h-16">
+        <div className="flex items-center justify-between h-full">
+          <div className="flex items-center gap-8">
+            <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-all">
+              <div className="size-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                <MessageSquare className="w-5 h-5 text-primary" />
+              </div>
+              <h1 className="text-lg font-bold">WeChat</h1>
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link
+              to={"/settings"}
+              className={`
+              btn btn-sm gap-2 transition-colors
+              
+              `}
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">Settings</span>
+            </Link>
+
+            {authUser && (
+              <>
+                <Link to={"/profile"} className={`btn btn-sm gap-2`}>
+                  <User className="size-5" />
+                  <span className="hidden sm:inline">Profile</span>
+                </Link>
+
+                <button className="flex gap-2 items-center" onClick={logout}>
+                  <LogOut className="size-5" />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
-    </div>
-    <div class="dropdown dropdown-end">
-      <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-        <div class="w-10 rounded-full">
-          <img
-            alt="Tailwind CSS Navbar component"
-            src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
-        </div>
-      </div>
-      <ul
-        tabindex="0"
-        class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
-        <li>
-          <a class="justify-between">
-            Profile
-            <span class="badge">New</span>
-          </a>
-        </li>
-        <li><a>Settings</a></li>
-        <li><a>Logout</a></li>
-      </ul>
-    </div>
-  </div>
-</div>
+    </header>
   );
 };
 
