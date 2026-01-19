@@ -8,10 +8,13 @@ import SettingsPage from "./pages/SettingsPage.jsx";
 
 import { Routes, Route, UNSAFE_shouldHydrateRouteLoader } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore.js";
+import { useThemeStore } from "./store/useThemeStore.js";
 import { useEffect } from "react";
 
 const App = () => {
    const {authUser , checkAuth , isCheckingAuth} = useAuthStore();
+   const { theme } = useThemeStore();
+
    useEffect(() => {
      checkAuth();
    }, [checkAuth]);
@@ -22,7 +25,7 @@ const App = () => {
     )
    }
   return (
-    <div>
+    <div  data-theme={theme}>
       <Navbar />
       <h1>Welcome to the App</h1>
       <Routes>
