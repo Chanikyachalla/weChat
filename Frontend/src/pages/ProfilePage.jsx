@@ -7,22 +7,13 @@ import { Camera, User, Mail } from "lucide-react"
   const [selectedImg, setSelectedImg] = useState(null);
 
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const file = e.target.files[0];
+  if (!file) return;
 
-    const reader = new FileReader();
+  setSelectedImg(URL.createObjectURL(file)); 
+  await updateProfilePic(file);
+};
 
-    reader.readAsDataURL(file);
-
-    reader.onload = async () => {
-      const base64Image = reader.result;
-      setSelectedImg(base64Image);
-     
-      await updateProfilePic(base64Image);
-      
-    };
-  };
- 
     
   return (
      <div className="h-screen pt-20">

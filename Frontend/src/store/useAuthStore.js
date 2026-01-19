@@ -64,19 +64,24 @@ export const useAuthStore = create((set) => ({
         set({ isLoggingIng: false });
       } },
 
-      updateProfilePic: async (profilePic) => {
-        set({ isUpsdatingProfile: true });    
-        try {
-         const res = await axiosInstance.put('/auth/update-profile', { profilePic });
-         console.log("call came to backend ");
-          set({ authUser: res.data });
-          toast.success("Profile picture updated successfully!");
-           
-        }catch (error) {
-          console.error('Update profile picture error:', error);
-          toast.error(error.response?.data?.message || "Profile update failed. Please try again.");
-        } finally {
-          set({ isUpsdatingProfile: false });
-        } },
+     updateProfilePic: async (file) => {
+  set({ isUpsdatingProfile: true });
 
+  try {
+    const formData = new FormData();
+    formData.append("profilePic", file);
+
+    const res = await axiosInstance.post(
+      "/auth/update-profile",
+      formData
+    );
+
+    set({ authUser: res.data });
+    toast.success("Profile picture updated successfully!");
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Update failed");
+  } finally {
+    set({ isUpsdatingProfile: false });
+  }
+}
 }));
