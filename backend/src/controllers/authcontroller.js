@@ -100,25 +100,34 @@ export const logout = async (req,res) =>{
      res.status(200).json({message:" user logged out "});
 }
 
-export const updateProfile = async (req , res) =>{
-  try{
-    const {profilePic} = req.body ;
+export const updateProfile = async (req, res) => {
+  try {
     const userId = req.user._id;
 
-    if(!profilePic){
-      return res.status(400).json({message: "profile pic is required "});
+    if (!req.file) {
+      return res.status(400).json({ message: "Profile pic is required" });
     }
 
-     const uploadResponse = await cloudinary.uploader.upload(profilePic);
-     const updatedUser = await User.findByIdAndUpdate(userId , {profilePic : uploadResponse.secure_url} , {new: true });
+    const base64Image = req.file.buffer.toString("base64");
 
-     res.status(200).json(updatedUser);
-  } catch (error){
-    console.log("some error in the profile piic ploadin in login controller " , error.message);
-        res.status(500).json({message: "some internal error in the profile piic ploadin in login controller"});
-  }
+    const uploadResponse = await cloudinary.uploader.upload(
+      `data:${req.file.mimetype};base64,${base64Image}`,
+      { folder: "profile_pics" }
+    );
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profilePic: uploadResponse.secure_url },
+      { new: true }
+    );
     
-} 
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Profile pic upload error:", error.message);
+    res.status(500).json({ message: "Profile update failed" });
+  }
+};
+
 
 export const checkAuth = async (req, res) => {
    try{
