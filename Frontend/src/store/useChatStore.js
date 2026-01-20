@@ -5,6 +5,7 @@ import { axiosInstance } from "../lib/axios.js";
 export const useChatStore = create((set, get) => ({
   messages : [],
   users : [],
+  searchedUsers: [],
   selectedUser : null,
   isUsersLoading : false,
   isMessagesLoading : false,
@@ -35,5 +36,17 @@ export const useChatStore = create((set, get) => ({
             set({isMessagesLoading : false});
         }   
     },
-    setSelectedUser : (selectedUser) => set({selectedUser})
+    setSelectedUser : (selectedUser) => set({selectedUser}),
+
+    getSearchedUsers : async (query) => {
+      try {
+        const res = await axiosInstance.get(`/message/search-users?q=${encodeURIComponent(query)}`);
+        set({ searchedUsers: res.data });
+      }
+      catch (error) {
+        console.error("Error searching users:", error);
+        toast.error("Failed to search users. Please try again.");
+      }
+    },
+
 }));

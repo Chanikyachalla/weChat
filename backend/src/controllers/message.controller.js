@@ -72,3 +72,28 @@ export const deleteMessage = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }   
 } ;
+export const searchUsers = async (req, res) => {
+  try {
+    const q = req.query.q?.trim();
+
+    // Empty or missing query → return empty list
+    if (!q) {
+      return res.status(200).json([]);
+    }
+
+    const users = await User.find({
+      _id: { $ne: req.user._id },
+      fullName: { $regex: `^${q}`, $options: "i" }, // prefix search
+    })
+      .select("fullName profilePic")
+      .limit(10);
+
+    return res.status(200).json(users);
+  } catch (error) {
+    console.error("Search users error:", error.message);
+
+    return res.status(500).json({
+      message: "Failed to search users",
+    });
+  }
+};

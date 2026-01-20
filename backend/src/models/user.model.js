@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
     fullName: {
       type: String,
       required: true,
+      index: true,
     },
     password: {
       type: String,
@@ -25,5 +26,6 @@ const userSchema = new mongoose.Schema(
 );
 
 const User = mongoose.model("User", userSchema);
+
 
 export default User;
