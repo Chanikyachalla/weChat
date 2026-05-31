@@ -1,6 +1,8 @@
 import express from "express";
 import User from "../models/user.model.js";
 import Message from "../models/message.js";
+import Chat from "../models/chat.model.js";
+import cloudinary from "../config/clodinary.js";
 
 export const getUserForSidebar = async (req, res) => {
     try {
@@ -95,5 +97,20 @@ export const searchUsers = async (req, res) => {
     return res.status(500).json({
       message: "Failed to search users",
     });
+  }
+};
+export const getChats = async (req, res) => {
+  try {
+    const chats = await Chat.find({
+      participants: req.user._id,
+    })
+      .sort({ updatedAt: -1 })
+      .populate("participants", "fullName profilePic")
+      .limit(6); // pagination later
+
+    res.status(200).json(chats);
+  } catch (error) {
+    console.error("Get chats error:", error.message);
+    res.status(500).json({ message: "Failed to fetch chats" });
   }
 };

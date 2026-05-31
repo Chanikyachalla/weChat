@@ -2,42 +2,44 @@ import { useEffect, useState } from "react";
 import { useChatStore } from "../store/useChatStore.js";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton";
 import { User, Search } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore.js";
 
 const Sidebar = () => {
+  const { authUser } = useAuthStore();
+
   const {
-    getUsers,
-    getSearchedUsers,
-    users,
+    chats,
     searchedUsers,
-    selectedUser,
-    setSelectedUser,
-    isUsersLoading,
+    selectedChat,
+    getChats,
+    getSearchedUsers,
+    setSelectedChat,
+    isChatsLoading,
   } = useChatStore();
 
   const [query, setQuery] = useState("");
 
+  // Fetch conversations (NOT users)
   useEffect(() => {
-    getUsers();
-  }, [getUsers]);
+    getChats();
+  }, [getChats]);
 
-  // Handle search input
+  // Debounced search (for new users only)
   useEffect(() => {
-    if (!query.trim()) {
-      return;
-    }
+    if (!query.trim()) return;
 
-    const timeout = setTimeout(() => {
+    const timer = setTimeout(() => {
       getSearchedUsers(query);
-    }, 300); // debounce
+    }, 300);
 
-    return () => clearTimeout(timeout);
+    return () => clearTimeout(timer);
   }, [query, getSearchedUsers]);
 
-  if (isUsersLoading) {
+  if (isChatsLoading) {
     return <SidebarSkeleton />;
   }
 
-  const displayUsers = query.trim() ? searchedUsers : users;
+
 
   return (
     <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
@@ -51,7 +53,7 @@ const Sidebar = () => {
           </span>
         </div>
 
-        {/* Search bar (desktop only) */}
+        {/* Search (start new chat) */}
         <div className="hidden lg:block relative">
           <Search className="absolute left-3 top-2.5 w-4 h-4 text-zinc-400" />
           <input
@@ -64,48 +66,62 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Users list */}
+      {/* List */}
       <div className="overflow-y-auto flex-1 w-full py-3">
-        {displayUsers.length === 0 && query.trim() && (
-          <p className="text-center text-sm text-zinc-400">
-            No users found
-          </p>
-        )}
-
-        {displayUsers.map((user) => (
-          <button
-            key={user._id}
-            onClick={() => {
-              setSelectedUser(user);
-              setQuery(""); // reset search after selection
-            }}
-            className={`
-              w-full p-3 flex items-center gap-3
-              hover:bg-base-300 transition-colors
-              ${selectedUser?._id === user._id ? "bg-base-300 ring-1 ring-base-300" : ""}
-            `}
-          >
-            {/* Avatar */}
-            <div className="relative mx-auto lg:mx-0">
+        {/* SEARCH RESULTS (new users) */}
+        {query.trim() &&
+          searchedUsers.map((user) => (
+            <button
+              key={user._id}
+              onClick={() => {
+                setSelectedChat(user);
+                setQuery("");
+              }}
+              className="w-full p-3 flex items-center gap-3 hover:bg-base-300"
+            >
               <img
                 src={user.profilePic || "/avatar.png"}
                 alt={user.fullName}
-                className="size-12 object-cover rounded-full"
+                className="size-12 rounded-full object-cover"
               />
-            </div>
 
-            {/* User info */}
-            <div className="hidden lg:block text-left min-w-0">
-              <div className="font-medium truncate">
-                {user.fullName}
+              <div className="hidden lg:block text-left">
+                <div className="font-medium">{user.fullName}</div>
+                <div className="text-sm text-zinc-400">
+                  Start new chat
+                </div>
               </div>
-              <div className="text-sm text-zinc-400">
-                {/* Socket-based online status later */}
-                Offline
-              </div>
-            </div>
-          </button>
-        ))}
+            </button>
+          ))}
+
+        {/* USER LIST */}
+        {!query.trim() &&
+          chats.map((user) => (
+              <button
+                key={user._id}
+                onClick={() => setSelectedChat(user)}
+                className={`
+                  w-full p-3 flex items-center gap-3 hover:bg-base-300
+                  ${
+                    selectedChat?._id === user._id
+                      ? "bg-base-300 ring-1 ring-base-300"
+                      : ""
+                  }
+                `}
+              >
+                <img
+                  src={user.profilePic || "/avatar.png"}
+                  alt={user.fullName}
+                  className="size-12 rounded-full object-cover"
+                />
+
+                <div className="hidden lg:block text-left min-w-0">
+                  <div className="font-medium truncate">
+                    {user.fullName}
+                  </div>
+                </div>
+              </button>
+          ))}
       </div>
     </aside>
   );

@@ -5,8 +5,12 @@ import {getmessages} from "../controllers/message.controller.js";
 import {sendMessage} from "../controllers/message.controller.js";
 import {deleteMessage} from "../controllers/message.controller.js";
 import {searchUsers} from "../controllers/message.controller.js";
+import {getChats} from "../controllers/message.controller.js";
+
 const router = express.Router();
 router.get("/users", protectRoute,getUserForSidebar);
+router.get("/chats", protectRoute, getChats);
+
 router.get("/search-users", protectRoute, searchUsers);
 router.get("/:id", protectRoute, getmessages);
 router.post("/send/:id", protectRoute, sendMessage);
